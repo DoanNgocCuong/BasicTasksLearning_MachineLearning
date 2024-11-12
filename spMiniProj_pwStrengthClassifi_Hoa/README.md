@@ -2,7 +2,9 @@
 - scikit-learn==1.5.0 (lúc train với lúc run app.py không nên khác phiên bản quá nhiều để tránh xung đột)
 
 
-#### Kết quả 
+# 1. Kết quả thực nghiệm 
+
+## 1.1 Train model với dữ liệu gốc (với các features được tạo chưa qua xử lý Outlier, Smote, ...)
 
 - Logistic Regression: `model = LogisticRegression(multi_class='ovr', max_iter=1000)`
 ```
@@ -49,8 +51,8 @@ weighted avg       0.81      0.81      0.81    133928
 ```
 
 
-Random Forest tốt hơn Logistic Regression và Naive Bayes.
-============
+## 1.2 Kết luận: Random Forest tốt hơn Logistic Regression và Naive Bayes.
+
 ```
 1. So sánh tổng quát:
 Random Forest có hiệu suất tốt nhất với độ chính xác (accuracy) 0.81.
@@ -72,20 +74,19 @@ Gặp khó khăn trong việc phân loại lớp 0 (F1-score chỉ 0.03).
 Có xu hướng phân loại nhiều mẫu vào lớp 1 (recall 0.96 cho lớp 1).
 ```
 
+========================================
 
 
+## 1.3. Xử lý outliers
 
-===================
-
-# Xử lý outliers
-
-**REPORT: PHÂN TÍCH XỬ LÝ OUTLIERS TRONG DỮ LIỆU MẬT KHẨU**
 
 **1. Phương Pháp Xử Lý Outliers:**
 
-a) **Phương pháp IQR (Interquartile Range):**
+a) **Phương pháp phát hiện và xử lý outliers bằng IQR (Interquartile Range):**
 - Xác định outliers dựa trên công thức: Q1 - 1.5*IQR và Q3 + 1.5*IQR
 - Áp dụng cho 9 features: length, uppercase_count, lowercase_count, digit_count, special_char_count, consecutive_digits_count, consecutive_letters_count, repeat_char_count, char_variety
+
+Notes: Ngoài phương pháp IQR chúng ta có thể sử dụng Z-score để phát hiện và xử lý outliers.
 
 b) **Hai cách xử lý được thử nghiệm:**
 1. **Clip Method:**
@@ -129,8 +130,8 @@ Accuracy: 0.7585 (≈ 75.85%)
 1                 0.88      0.82      0.85
 2                 0.06      0.10      0.07
 ```
-- Hiệu suất giảm so với dữ liệu gốc
-- Gây mất cân bằng dữ liệu nghiêm trọng:
+- Hiệu suất giảm so với dữ liệu gốc 
+- Nguyên do là phương pháp Gây mất cân bằng dữ liệu nghiêm trọng:
   + Class 1: 416,042 mẫu (79.4%)
   + Class 0: 78,644 mẫu (15.0%)
   + Class 2: 29,526 mẫu (5.6%)
@@ -154,29 +155,61 @@ Accuracy: 0.7585 (≈ 75.85%)
      + Giảm hiệu suất model, đặc biệt với class 2
      + Mất nhiều mẫu dữ liệu có thể quan trọng
 
-**4. Đề Xuất Cải Thiện:**
-
-1. **Cân Bằng Dữ liệu:**
-   - Sử dụng SMOTE để tạo mẫu tổng hợp cho classes thiểu số
-   - Kết hợp over-sampling và under-sampling
-
-2. **Điều Chỉnh Phương Pháp:**
+**4. Nhận xét và Đề Xuất Cải Thiện cho Outliers:**
+1. Vấn đề là: Các mẫu "bất thường" có thể chứa thông tin quan trọng về mật khẩu mạnh
+2. Giải pháp: 
+- Thử nghiệm với phương pháp xử lý Outlier khác + kết hợp domain knowledge 
    - Thử nghiệm với ngưỡng IQR khác (2.0, 2.5)
    - Xử lý outliers theo từng class riêng biệt
    - Kết hợp domain knowledge về mật khẩu để xác định outliers
-
-3. **Feature Engineering:**
+- Kết hợp các kỹ thuật xử lý mất cân bằng dữ liệu
+   - Sử dụng SMOTE để tạo mẫu tổng hợp cho classes thiểu số
+   - Kết hợp over-sampling và under-sampling
+- Tập trung vào feature engineering và cải thiện model thêm bên cạnh việc xử lý outliers.
    - Thêm các features mới (tỷ lệ, độ phức tạp)
    - Tạo các features tương tác
    - Chuẩn hóa features theo cách khác
-
-4. **Thử Nghiệm Mô Hình:**
    - Sử dụng các thuật toán khác (XGBoost, LightGBM)
    - Tinh chỉnh hyperparameters
    - Ensemble nhiều models
 
-**5. Kết Luận:**
-- Với đặc thù của bài toán phân loại độ mạnh mật khẩu, việc xử lý outliers cần cân nhắc kỹ
-- Các mẫu "bất thường" có thể chứa thông tin quan trọng về mật khẩu mạnh
-- Nên kết hợp domain knowledge và các kỹ thuật xử lý mất cân bằng dữ liệu
-- Tập trung vào feature engineering và cải thiện model thay vì xử lý outliers đơn thuần
+================
+
+
+# 2. Future Work**
+
+1. **Xử Lý Outliers:**
+
+   - Sử dụng các phương pháp xử lý outliers khác nhau để so sánh kết quả, như IQR, Z-score, và phương pháp khác.
+
+   - Thử nghiệm với ngưỡng IQR khác nhau (2.0, 2.5) để xem ảnh hưởng đến hiệu suất mô hình.
+
+   - Xử lý outliers theo từng class riêng biệt để cải thiện độ chính xác cho các lớp thiểu số.
+
+
+2. **Cân Bằng Dữ Liệu:**
+
+   - Sử dụng SMOTE để tạo mẫu tổng hợp cho các classes thiểu số và kết hợp với các phương pháp over-sampling và under-sampling khác.
+   - Thử nghiệm với các kỹ thuật cân bằng dữ liệu khác nhau để đánh giá hiệu quả của chúng trên mô hình.
+
+
+3. **Feature Engineering:**
+
+   - Thêm các features mới như tỷ lệ và độ phức tạp của mật khẩu.
+
+   - Tạo các features tương tác để cải thiện khả năng phân loại.
+
+   - Chuẩn hóa features theo các phương pháp khác nhau để tối ưu hóa mô hình.
+
+4. **Thử Nghiệm Mô Hình:**
+   - Sử dụng các thuật toán khác như XGBoost và LightGBM để so sánh hiệu suất.
+
+   - Tinh chỉnh hyperparameters cho các mô hình hiện tại và mới để đạt được kết quả tốt nhất.
+
+   - Thực hiện ensemble nhiều models để cải thiện độ chính xác và độ ổn định của dự đoán.
+
+5. **Đánh Giá và Phân Tích:**
+   - Đánh giá hiệu suất của các mô hình và phương pháp xử lý khác nhau bằng các chỉ số như accuracy, precision, recall và F1-score.
+
+   - Phân tích các mẫu "bất thường" để xác định thông tin quan trọng có thể cải thiện mô hình.
+
